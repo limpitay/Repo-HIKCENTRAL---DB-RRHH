@@ -1,0 +1,115 @@
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Estructura organizacional de CURF: 13 departamentos, 138 sectores y 2009 empleados, con desglose expandible de empleados por sector dentro de cada departamento.</h2>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.5rem;">
+  <div style="background:var(--surface-1);border-radius:var(--radius);padding:1rem;">
+    <p style="font-size:13px;color:var(--text-secondary);margin:0 0 4px;">Departamentos</p>
+    <p style="font-size:24px;font-weight:500;margin:0;">13</p>
+  </div>
+  <div style="background:var(--surface-1);border-radius:var(--radius);padding:1rem;">
+    <p style="font-size:13px;color:var(--text-secondary);margin:0 0 4px;">Sectores</p>
+    <p style="font-size:24px;font-weight:500;margin:0;">138</p>
+  </div>
+  <div style="background:var(--surface-1);border-radius:var(--radius);padding:1rem;">
+    <p style="font-size:13px;color:var(--text-secondary);margin:0 0 4px;">Empleados</p>
+    <p style="font-size:24px;font-weight:500;margin:0;">2009</p>
+  </div>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+  <i class="ti ti-search" style="font-size:16px;color:var(--text-muted);" aria-hidden="true"></i>
+  <input type="text" id="filterInput" placeholder="Buscar sector o departamento" style="flex:1;" />
+</div>
+
+<div id="deptList"></div>
+
+<script>
+const data = [
+  {"departamento":"Medicina","num_sectores":52,"total_empleados":619,"sectores":[{"sector":"Ginecología y Obstetricia","empleados":77},{"sector":"Guardia Pediátrica","empleados":47},{"sector":"Cardiología","empleados":45},{"sector":"Guardia Central","empleados":36},{"sector":"Clinica Medica","empleados":34},{"sector":"Neurología","empleados":25},{"sector":"Neonatología","empleados":23},{"sector":"Unidad de Terapia Intensiva","empleados":21},{"sector":"Pediatría","empleados":21},{"sector":"Dermatología","empleados":20},{"sector":"Clinica Pediátrica","empleados":18},{"sector":"UTI Pediátrica","empleados":17},{"sector":"Salud Mental","empleados":17},{"sector":"Diabetología  y Nutrición","empleados":15},{"sector":"Gastroenterología","empleados":15},{"sector":"Alergia e Inmunología","empleados":14},{"sector":"Internado Pediatría","empleados":14},{"sector":"Neurología Pediátrica","empleados":14},{"sector":"Endocrinología","empleados":13},{"sector":"Nutrición","empleados":12},{"sector":"Infectología","empleados":12},{"sector":"Oncología","empleados":10},{"sector":"Coordinadores","empleados":7},{"sector":"Salud Femenina y Perinatal","empleados":7},{"sector":"Cardiología Pediátrica","empleados":7},{"sector":"Internado Adultos","empleados":6},{"sector":"Neumonología","empleados":6},{"sector":"UCO","empleados":5},{"sector":"Unidad de Medicina del Deporte","empleados":5},{"sector":"Nefrología","empleados":5},{"sector":"Reumatología","empleados":5},{"sector":"Neumonología Pediátrica","empleados":5},{"sector":"Nutrición Pediátrica","empleados":4},{"sector":"Gastroenterología Pediátrica","empleados":4},{"sector":"Hemodinamia","empleados":3},{"sector":"Nefrología pediátrica","empleados":3},{"sector":"Dermatología Pediátrica","empleados":3},{"sector":"Endocrinología Pediátrica","empleados":3},{"sector":"Nutrición Pediátrica Médica","empleados":2},{"sector":"Infectología Pediátrica","empleados":2},{"sector":"Enfermedades Metabólicas","empleados":2},{"sector":"Reumatología Pediátrica","empleados":2},{"sector":"Cuidados Paliativos Adultos","empleados":2},{"sector":"Oncohematología Pediátrica","empleados":2},{"sector":"Neurocirugía Pediátrica","empleados":2},{"sector":"UCO y Cardiología Ambulatoria","empleados":1},{"sector":"Diabetología Pediátrica","empleados":1},{"sector":"Toxicología","empleados":1},{"sector":"Cirugía Cardiovascular Pediátrica","empleados":1},{"sector":"Cuidado Paliativo Pediátricos","empleados":1},{"sector":"Genetica","empleados":1},{"sector":"Hepatología","empleados":1}]},
+  {"departamento":"Cirugía","num_sectores":21,"total_empleados":290,"sectores":[{"sector":"Instrumentación Quirúrgica","empleados":51},{"sector":"Anestesia","empleados":32},{"sector":"Central de Esterilización","empleados":28},{"sector":"Oftalmología","empleados":26},{"sector":"Traumatología","empleados":25},{"sector":"ORL","empleados":22},{"sector":"Cirugía General","empleados":20},{"sector":"Urología","empleados":14},{"sector":"Odontología","empleados":12},{"sector":"Secretaría Quirurgica","empleados":10},{"sector":"Neurocirugía","empleados":10},{"sector":"Cirugía Plástica","empleados":7},{"sector":"Cirugía General Pediátrica","empleados":7},{"sector":"Cirugía Vascular Periférica","empleados":6},{"sector":"Cabeza y Cuello","empleados":5},{"sector":"Cirugía Cardiovascular Adultos","empleados":5},{"sector":"Cirugía de Tórax","empleados":4},{"sector":"Traumatología Pediátrica","empleados":2},{"sector":"Urología Pediátrica","empleados":2},{"sector":"Quirófano","empleados":1},{"sector":"Cirugía","empleados":1}]},
+  {"departamento":"Enfermería","num_sectores":8,"total_empleados":233,"sectores":[{"sector":"Enfermería Área Crítica","empleados":47},{"sector":"Enfermería General","empleados":43},{"sector":"Enfermería Área Pediátrica","empleados":41},{"sector":"Enfermería Área Ambulatoria","empleados":32},{"sector":"Enfermería Área Gineco - Obstetricia","empleados":32},{"sector":"Enfermería Área Neonatología","empleados":19},{"sector":"Camilleros","empleados":11},{"sector":"Enfermería","empleados":8}]},
+  {"departamento":"Atención al Paciente","num_sectores":7,"total_empleados":202,"sectores":[{"sector":"Secretaría","empleados":135},{"sector":"Centro de Contacto","empleados":38},{"sector":"Guardia Administrativa","empleados":10},{"sector":"Admisión","empleados":8},{"sector":"Mega Salud","empleados":8},{"sector":"Secretaría de Presupuestos","empleados":2},{"sector":"Atención al Pte Internado y Guardia","empleados":1}]},
+  {"departamento":"Diagnóstico y Laboratorio","num_sectores":9,"total_empleados":191,"sectores":[{"sector":"Diagnóstico por Imágenes","empleados":84},{"sector":"Laboratorio Central","empleados":55},{"sector":"Microbiología","empleados":17},{"sector":"Hematología","empleados":11},{"sector":"Anatomía Patológica","empleados":8},{"sector":"Hemoterapia","empleados":8},{"sector":"Biología Molecular","empleados":4},{"sector":"Hemostasia","empleados":3},{"sector":"Anatomía Patológica A","empleados":1}]},
+  {"departamento":"Soporte Hospitalario","num_sectores":9,"total_empleados":142,"sectores":[{"sector":"Limpieza","empleados":48},{"sector":"Limpro - Servicio tercerizado de limpieza","empleados":46},{"sector":"Mantenimiento","empleados":17},{"sector":"Sistemas","empleados":11},{"sector":"Calidad y Operaciones","empleados":8},{"sector":"Bioingeniería","empleados":6},{"sector":"Archivo","empleados":3},{"sector":"Obras","empleados":2},{"sector":"Personal de Limpieza Limpro","empleados":1}]},
+  {"departamento":"Administración","num_sectores":11,"total_empleados":107,"sectores":[{"sector":"Facturación","empleados":41},{"sector":"RRHH","empleados":16},{"sector":"Comunicación e Imagen Institucional","empleados":10},{"sector":"Compras","empleados":8},{"sector":"Higiene y Seguridad","empleados":7},{"sector":"Finanzas","empleados":7},{"sector":"Convenios","empleados":6},{"sector":"Auditoría Medica","empleados":5},{"sector":"Contaduría","empleados":4},{"sector":"Comité Institucional de Ética en Invest. en Salud","empleados":2},{"sector":"Administración y Finanzas","empleados":1}]},
+  {"departamento":"Rehabilitación","num_sectores":9,"total_empleados":87,"sectores":[{"sector":"Fisioterapia consultorios externos","empleados":30},{"sector":"Fonoaudiología","empleados":16},{"sector":"Fisioterapia Internados","empleados":12},{"sector":"Fisioterapia Internados y Consultorios externos","empleados":8},{"sector":"Audiología","empleados":7},{"sector":"Terapia Ocupacional","empleados":7},{"sector":"Psicopedagogía","empleados":5},{"sector":"Rehabilitación","empleados":1},{"sector":"Osteopatía","empleados":1}]},
+  {"departamento":"Proveedores Externos","num_sectores":2,"total_empleados":39,"sectores":[{"sector":"Bar","empleados":38},{"sector":"Okinet - Servicio de impresoras externo","empleados":1}]},
+  {"departamento":"Seguridad","num_sectores":2,"total_empleados":29,"sectores":[{"sector":"Optima Seguridad","empleados":16},{"sector":"Policias","empleados":13}]},
+  {"departamento":"Farmacia","num_sectores":1,"total_empleados":28,"sectores":[{"sector":"Farmacia","empleados":28}]},
+  {"departamento":"Dirección","num_sectores":5,"total_empleados":26,"sectores":[{"sector":"Comisión Directiva de Fund. para el Prog. de UCC","empleados":11},{"sector":"Dirección","empleados":8},{"sector":"Comité de Bioética","empleados":4},{"sector":"Prestaciones Médicas","empleados":2},{"sector":"Sin Datos","empleados":1}]},
+  {"departamento":"Investigación y Docencia","num_sectores":2,"total_empleados":16,"sectores":[{"sector":"Docencia e Investigación","empleados":13},{"sector":"Unidad de Investigación Clínica","empleados":3}]}
+];
+
+const maxDept = Math.max(...data.map(d => d.total_empleados));
+const container = document.getElementById('deptList');
+
+function renderList(filterText) {
+  container.innerHTML = '';
+  const ft = (filterText || '').toLowerCase().trim();
+
+  data.forEach((d, i) => {
+    const matchDept = d.departamento.toLowerCase().includes(ft);
+    const matchedSectores = d.sectores.filter(s => s.sector.toLowerCase().includes(ft));
+    if (ft && !matchDept && matchedSectores.length === 0) return;
+
+    const sectoresToShow = ft && !matchDept ? matchedSectores : d.sectores;
+    const maxSector = Math.max(...d.sectores.map(s => s.empleados));
+    const pct = Math.round((d.total_empleados / maxDept) * 100);
+
+    const card = document.createElement('div');
+    card.style.cssText = 'background:var(--surface-2);border:0.5px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;';
+
+    const header = document.createElement('button');
+    header.setAttribute('aria-expanded', ft ? 'true' : 'false');
+    header.style.cssText = 'width:100%;text-align:left;background:transparent;border:none;border-radius:0;padding:1rem 1.25rem;cursor:pointer;display:block;';
+    header.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+          <i class="ti ti-chevron-down chev" style="font-size:16px;color:var(--text-muted);flex-shrink:0;transition:transform .15s;" aria-hidden="true"></i>
+          <span style="font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${d.departamento}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;flex-shrink:0;">
+          <span style="font-size:13px;color:var(--text-secondary);">${d.num_sectores} sector${d.num_sectores!==1?'es':''}</span>
+          <span style="font-size:15px;font-weight:500;font-family:var(--font-mono);min-width:42px;text-align:right;">${d.total_empleados}</span>
+        </div>
+      </div>
+      <div style="height:6px;background:var(--surface-1);border-radius:3px;margin-top:10px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:#1D9E75;border-radius:3px;"></div>
+      </div>
+    `;
+
+    const body = document.createElement('div');
+    body.style.cssText = 'padding:0 1.25rem 1rem;display:' + (ft ? 'block' : 'none') + ';';
+    body.innerHTML = sectoresToShow.map(s => {
+      const spct = Math.round((s.empleados / maxSector) * 100);
+      return `
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-top:0.5px solid var(--border);">
+          <span style="font-size:13px;color:var(--text-secondary);width:230px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.sector}</span>
+          <div style="flex:1;height:6px;background:var(--surface-1);border-radius:3px;overflow:hidden;">
+            <div style="height:100%;width:${spct}%;background:#5DCAA5;border-radius:3px;"></div>
+          </div>
+          <span style="font-size:13px;font-family:var(--font-mono);width:28px;text-align:right;flex-shrink:0;">${s.empleados}</span>
+        </div>
+      `;
+    }).join('');
+
+    header.addEventListener('click', () => {
+      const isOpen = body.style.display === 'block';
+      body.style.display = isOpen ? 'none' : 'block';
+      header.querySelector('.chev').style.transform = isOpen ? 'rotate(0deg)' : 'rotate(-90deg)';
+      header.setAttribute('aria-expanded', String(!isOpen));
+    });
+
+    if (ft) header.querySelector('.chev').style.transform = 'rotate(-90deg)';
+
+    card.appendChild(header);
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+
+  if (container.children.length === 0) {
+    container.innerHTML = '<p style="font-size:14px;color:var(--text-muted);text-align:center;padding:2rem 0;">Sin resultados.</p>';
+  }
+}
+
+renderList('');
+document.getElementById('filterInput').addEventListener('input', e => renderList(e.target.value));
+</script>
