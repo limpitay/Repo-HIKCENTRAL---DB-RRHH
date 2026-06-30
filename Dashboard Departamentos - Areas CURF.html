@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard — Integración SED × HikCentral</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #f0f2f5; color: #1a1a2e; padding: 24px; }
+h1 { font-size: 22px; font-weight: 700; color: #1F4E79; margin-bottom: 4px; }
+.subtitle { font-size: 13px; color: #666; margin-bottom: 28px; }
+.schema { background: #fff; border-radius: 12px; padding: 28px 24px; margin-bottom: 28px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+.schema h2 { font-size: 14px; font-weight: 700; color: #1F4E79; margin-bottom: 20px; text-transform: uppercase; letter-spacing: .5px; }
+.flow { display: flex; align-items: center; flex-wrap: nowrap; overflow-x: auto; gap: 0; }
+.flow-box { background: #EBF3FB; border: 1.5px solid #2E75B6; border-radius: 10px; padding: 14px 18px; min-width: 130px; text-align: center; flex-shrink: 0; }
+.flow-box.result { background: #E2F5EE; border-color: #1F7A57; }
+.flow-box .db-name { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 4px; }
+.flow-box .db-title { font-size: 13px; font-weight: 700; color: #1F4E79; }
+.flow-box.result .db-title { color: #1F7A57; }
+.flow-box .db-count { font-size: 22px; font-weight: 700; color: #1F4E79; margin: 4px 0 2px; }
+.flow-box.result .db-count { color: #1F7A57; }
+.flow-box .db-sub { font-size: 11px; color: #888; }
+.arrow { display: flex; align-items: center; padding: 0 8px; flex-shrink: 0; }
+.arrow-line { width: 36px; height: 2px; background: #2E75B6; position: relative; }
+.arrow-line::after { content:''; position:absolute; right:-1px; top:-4px; border:5px solid transparent; border-left:8px solid #2E75B6; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 28px; }
+.kpi { background:#fff; border-radius:10px; padding:18px 16px; box-shadow:0 1px 4px rgba(0,0,0,.07); border-left:4px solid #2E75B6; }
+.kpi.green { border-color:#1F7A57; } .kpi.orange { border-color:#C55A11; } .kpi.red { border-color:#A32D2D; }
+.kpi-val { font-size:32px; font-weight:700; color:#1F4E79; line-height:1; }
+.kpi.green .kpi-val { color:#1F7A57; } .kpi.orange .kpi-val { color:#C55A11; } .kpi.red .kpi-val { color:#A32D2D; }
+.kpi-label { font-size:12px; color:#555; margin-top:6px; font-weight:600; }
+.kpi-sub { font-size:11px; color:#999; margin-top:2px; }
+.section-title { font-size:13px; font-weight:700; color:#1F4E79; text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; }
+.chart-card { background:#fff; border-radius:12px; padding:22px 20px; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom: 28px; }
+.bar-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.bar-label { width:210px; font-size:12px; color:#333; text-align:right; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bar-track { flex:1; background:#f0f2f5; border-radius:4px; height:22px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:4px; display:flex; align-items:center; padding-left:8px; font-size:11px; font-weight:700; color:#fff; }
+.bar-count { font-size:12px; color:#555; width:36px; text-align:right; flex-shrink:0; }
+.acc-item { border:0.5px solid #ddd; border-radius:8px; margin-bottom:6px; overflow:hidden; }
+.acc-header { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; cursor:pointer; user-select:none; background:#f7f7f7; transition:background .15s; }
+.acc-header:hover { background:#efefef; }
+.acc-left { display:flex; align-items:center; gap:10px; }
+.acc-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.acc-name { font-size:13px; font-weight:600; color:#1a1a2e; }
+.acc-meta { font-size:11px; color:#888; margin-left:4px; }
+.acc-right { display:flex; align-items:center; gap:8px; }
+.acc-badge { font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px; }
+.acc-arrow { font-size:11px; color:#aaa; transition:transform .2s; display:inline-block; }
+.acc-arrow.open { transform:rotate(180deg); }
+.acc-body { display:none; padding:10px 14px 12px; background:#fff; border-top:0.5px solid #eee; }
+.acc-body.open { display:block; }
+.sector-table { width:100%; border-collapse:collapse; margin-top:8px; font-size:12px; }
+.sector-table th { background:#f0f4fa; color:#1F4E79; padding:5px 8px; text-align:left; font-weight:700; border-bottom:1px solid #ddd; }
+.sector-table td { padding:5px 8px; border-bottom:1px solid #f5f5f5; color:#444; }
+.sector-table tr:last-child td { border-bottom:none; }
+.sector-table td.num { text-align:right; font-weight:600; color:#1F4E79; width:40px; }
+.sector-bar-wrap { padding: 2px 0; }
+.sector-bar-track { background:#f0f2f5; border-radius:3px; height:5px; }
+.sector-bar-fill { height:100%; border-radius:3px; }
+.emp-bar-label { font-size:11px; color:#888; margin-bottom:4px; }
+.emp-bar-track { background:#f0f2f5; border-radius:3px; height:6px; width:100%; margin-bottom:10px; }
+.emp-bar-fill { height:100%; border-radius:3px; }
+.footer { text-align:center; font-size:11px; color:#aaa; margin-top:8px; }
+</style>
+</head>
+<body>
+
+<h1>Dashboard de Integración — SED × HikCentral Professional</h1>
+<p class="subtitle">CURF · Actualizado el 23/03/2026 · Base actual: 992 empleados · 13 departamentos · 62 sectores</p>
+
+<div class="schema">
+  <h2>Flujo de integración</h2>
+  <div class="flow">
+    <div class="flow-box"><div class="db-name">Origen</div><div class="db-title">SED</div><div class="db-count">988</div><div class="db-sub">empleados activos</div></div>
+    <div class="arrow"><div class="arrow-line"></div></div>
+    <div class="flow-box"><div class="db-name">Cruce</div><div class="db-title">HIK original</div><div class="db-count">821</div><div class="db-sub">registros previos</div></div>
+    <div class="arrow"><div class="arrow-line"></div></div>
+    <div class="flow-box result"><div class="db-name">Base final</div><div class="db-title">cruce_resultado</div><div class="db-count">988</div><div class="db-sub">SED como guía</div></div>
+    <div class="arrow"><div class="arrow-line"></div></div>
+    <div class="flow-box result"><div class="db-name">HikCentral hoy</div><div class="db-title">DB v9</div><div class="db-count">992</div><div class="db-sub">13 departamentos</div></div>
+  </div>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi green"><div class="kpi-val">992</div><div class="kpi-label">Total en HikCentral</div><div class="kpi-sub">Base v9 · 23/03/2026</div></div>
+  <div class="kpi green"><div class="kpi-val">13</div><div class="kpi-label">Departamentos</div><div class="kpi-sub">Estructura CURF/...</div></div>
+  <div class="kpi green"><div class="kpi-val">62</div><div class="kpi-label">Sectores únicos</div><div class="kpi-sub">Mapeados desde SED</div></div>
+  <div class="kpi"><div class="kpi-val">233</div><div class="kpi-label">Mayor depto.</div><div class="kpi-sub">CURF/Enfermería · 9 sectores</div></div>
+</div>
+
+<div class="chart-card">
+  <div class="section-title">Empleados por departamento</div>
+  <div id="bars"></div>
+</div>
+
+<div style="margin-bottom:28px">
+  <div class="section-title">Sectores por departamento</div>
+  <div id="acc"></div>
+</div>
+
+<p style="font-size:11px;color:#aaa;text-align:center;margin-top:4px">SED: <strong>988</strong> · HIK original: <strong>821</strong> · Cruzados: <strong>455</strong> · HIK hoy: <strong>992</strong> · Departamentos: <strong>13</strong> · Sectores: <strong>62</strong></p>
+<div class="footer" style="margin-top:20px">CURF · Integración SED × HikCentral Professional · 23/03/2026</div>
+
+<script>
+const depts = [
+  { name:"CURF/Enfermería", count:233, color:"#2E75B6", sectors:[
+    {s:"Enfermería Área Crítica",n:45},{s:"Enfermería General",n:41},{s:"Enfermería Área Pediátrica",n:38},
+    {s:"Enfermería Área Ambulatoria",n:32},{s:"Enfermería Área Gineco - Obstetricia",n:32},
+    {s:"Enfermería Área Neonatología",n:19},{s:"Enfermería",n:8},{s:"Camilleros",n:10},{s:"Anestesia",n:7}]},
+  { name:"CURF/Atención al Paciente", count:192, color:"#1F7A57", sectors:[
+    {s:"Secretaría",n:128},{s:"Centro de Contacto",n:35},{s:"Guardia Administrativa",n:10},
+    {s:"Admisión",n:8},{s:"Mega Salud",n:8},{s:"Secretaría de Presupuestos",n:2},{s:"Atención al Pte Internado y Guardia",n:1}]},
+  { name:"CURF/Soporte Hospitalario", count:115, color:"#555550", sectors:[
+    {s:"Limpieza",n:45},{s:"Limpro - Servicio tercerizado de limpieza",n:27},{s:"Mantenimiento",n:15},
+    {s:"Sistemas",n:11},{s:"Calidad y Operaciones",n:8},{s:"Bioingeniería",n:4},{s:"Archivo",n:3},{s:"Obras",n:1}]},
+  { name:"CURF/Administración", count:101, color:"#185FA5", sectors:[
+    {s:"Facturación",n:41},{s:"RRHH",n:12},{s:"Comunicación e Imagen Institucional",n:11},
+    {s:"Compras",n:8},{s:"Finanzas",n:8},{s:"Convenios",n:6},{s:"Auditoría Médica",n:5},
+    {s:"Contaduría",n:4},{s:"Higiene y Seguridad",n:4},{s:"Administración y Finanzas",n:1}]},
+  { name:"CURF/Cirugía", count:84, color:"#C55A11", sectors:[
+    {s:"Instrumentación Quirúrgica",n:45},{s:"Central de Esterilización",n:28},
+    {s:"Secretaría Quirúrgica",n:9},{s:"Cirugía",n:1},{s:"Quirófano",n:1}]},
+  { name:"CURF/Medicina", count:58, color:"#4040A0", sectors:[
+    {s:"Guardia Central",n:9},{s:"Neonatología",n:7},{s:"Nutrición",n:7},
+    {s:"Unidad de Terapia Intensiva",n:5},{s:"Neurología Pediátrica",n:4},{s:"UTI Pediátrica",n:3},
+    {s:"Alergia e Inmunología",n:2},{s:"Coordinadores",n:2},{s:"Hemodinamia",n:2},{s:"Internado Adultos",n:6},
+    {s:"Internado Pediatría",n:2},{s:"UCO",n:2},{s:"Ginecología y Obstetricia",n:1},
+    {s:"Guardia Pediátrica",n:1},{s:"Infectología",n:1},{s:"Pediatría",n:1},
+    {s:"Salud Femenina y Perinatal",n:1},{s:"UCO y Cardiología Ambulatoria",n:1}]},
+  { name:"CURF/Proveedores Externos", count:40, color:"#6B4226", sectors:[
+    {s:"BAR",n:37},{s:"Okinet - Servicio de impresoras externo",n:1}]},
+  { name:"CURF/Seguridad", count:40, color:"#444441", sectors:[
+    {s:"Optima Seguridad",n:27},{s:"Policias",n:13}]},
+  { name:"CURF/Rehabilitación", count:38, color:"#8E2458", sectors:[
+    {s:"Fisioterapia consultorios externos",n:22},{s:"Fisioterapia Internados",n:9},
+    {s:"Fisioterapia Internados y Consultorios externos",n:6},{s:"Rehabilitación",n:1}]},
+  { name:"CURF/Diagnóstico y Laboratorio", count:37, color:"#A0330A", sectors:[
+    {s:"Diagnóstico por Imágenes",n:30},{s:"Laboratorio Central",n:3},
+    {s:"Anatomía Patológica",n:1},{s:"Biología Molecular",n:1}]},
+  { name:"CURF/Farmacia", count:26, color:"#3B6D11", sectors:[{s:"Farmacia",n:26}]},
+  { name:"CURF/Dirección", count:21, color:"#333330", sectors:[
+    {s:"Comisión Directiva de Fund. para el Prog. de UCC",n:8},{s:"Dirección",n:7},
+    {s:"Comité de Bioética",n:4},{s:"Prestaciones Médicas",n:1}]},
+  { name:"CURF/Investigación y Docencia", count:7, color:"#5F5E5A", sectors:[
+    {s:"Docencia e Investigación",n:4},{s:"Unidad de Investigación Clínica",n:3}]},
+];
+
+// Barras
+const container = document.getElementById('bars');
+depts.forEach(d => {
+  const pct = (d.count/992*100).toFixed(1);
+  container.innerHTML += `<div class="bar-row"><div class="bar-label">${d.name}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${d.color}">${d.count>20?d.count:''}</div></div><div class="bar-count">${d.count}</div></div>`;
+});
+
+// Acordeón con tabla de sectores
+const acc = document.getElementById('acc');
+depts.forEach((d, i) => {
+  const maxN = Math.max(...d.sectors.map(s=>s.n));
+  const rows = d.sectors.map(s => {
+    const w = Math.round(s.n/maxN*100);
+    return `<tr>
+      <td>${s.s}</td>
+      <td class="num">${s.n}</td>
+      <td style="width:120px;padding:5px 8px">
+        <div class="sector-bar-track"><div class="sector-bar-fill" style="width:${w}%;background:${d.color};opacity:.7"></div></div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const item = document.createElement('div');
+  item.className = 'acc-item';
+  item.innerHTML = `
+    <div class="acc-header" onclick="toggle(${i})">
+      <div class="acc-left">
+        <div class="acc-dot" style="background:${d.color}"></div>
+        <span class="acc-name">${d.name}</span>
+        <span class="acc-meta">${d.sectors.length} sector${d.sectors.length!==1?'es':''}</span>
+      </div>
+      <div class="acc-right">
+        <span class="acc-badge" style="background:${d.color}22;color:${d.color}">${d.count} emp.</span>
+        <span class="acc-arrow" id="arr-${i}">▼</span>
+      </div>
+    </div>
+    <div class="acc-body" id="bdy-${i}">
+      <div class="emp-bar-label">${d.count} empleados (${(d.count/992*100).toFixed(1)}% del total)</div>
+      <div class="emp-bar-track"><div class="emp-bar-fill" style="width:${(d.count/992*100).toFixed(1)}%;background:${d.color}"></div></div>
+      <table class="sector-table">
+        <thead><tr><th>Sector</th><th style="text-align:right">Emp.</th><th>Distribución</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  acc.appendChild(item);
+});
+
+function toggle(i) {
+  const b = document.getElementById('bdy-'+i), a = document.getElementById('arr-'+i);
+  const o = b.classList.contains('open');
+  b.classList.toggle('open', !o);
+  a.classList.toggle('open', !o);
+}
+</script>
+</body>
+</html>
